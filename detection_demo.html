@@ -1,0 +1,41 @@
+<html>
+<body>
+<head>
+  <!-- Load TensorFlow.js-->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"> </script>
+  <!-- Load the coco-ssd model. -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"> </script>
+  <!-- Import the detect functions -->
+  <script src="detect.js" type="text/javascript"></script> 
+</head>
+
+
+
+
+<h1>Demo of TensorFlow.js Coco SSD's model object detection</h1>
+<!-- Replace this with your image. Make sure CORS settings allow reading the image! -->
+
+<p>Enter an image URL</p>
+<input type="text" id="imgUrl" value="Image URL ...">
+<button onclick="imageForm()">Detect!</button>
+<p id="demo"></p>
+
+<!-- <img id="img" src="https://news.nationalgeographic.com/content/dam/news/2018/05/17/you-can-train-your-cat/02-cat-training-NationalGeographic_1484324.jpg"/> -->
+
+<!-- <img id="img" src="cat.jpg"/> -->
+<p>
+<canvas id="myCanvas" width="224" height="224"></canvas>
+</p>
+
+<script>
+  function imageForm() {
+    var x = document.getElementById("imgUrl").value;
+    document.getElementById("demo").innerHTML = x;
+    detect(x);
+  }
+</script>
+
+<!-- Place your code in the script tag below. You can also use an external .js file -->
+
+</body>
+</html>
