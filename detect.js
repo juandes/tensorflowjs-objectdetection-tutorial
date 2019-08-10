@@ -1,5 +1,3 @@
-const e = React.createElement;
-
 class App extends React.Component {
   // reference to both the video and canvas
   videoRef = React.createRef();
@@ -10,6 +8,52 @@ class App extends React.Component {
     position: 'fixed',
     top: 150,
     left: 150,
+  };
+
+
+  detectFromVideoFrame = (model, video) => {
+    model.detect(video).then(predictions => {
+      this.showDetections(predictions);
+
+      requestAnimationFrame(() => {
+        this.detectFromVideoFrame(model, video);
+      });
+    }, (error) => {
+      console.log("Couldn't start the webcam")
+      console.error(error)
+    });
+  };
+
+  showDetections = predictions => {
+    const ctx = this.canvasRef.current.getContext("2d");
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    const font = "24px helvetica";
+    ctx.font = font;
+    ctx.textBaseline = "top";
+
+    predictions.forEach(prediction => {
+      const x = prediction.bbox[0];
+      const y = prediction.bbox[1];
+      const width = prediction.bbox[2];
+      const height = prediction.bbox[3];
+      // Draw the bounding box.
+      ctx.strokeStyle = "#2fff00";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, y, width, height);
+      // Draw the label background.
+      ctx.fillStyle = "#2fff00";
+      const textWidth = ctx.measureText(prediction.class).width;
+      const textHeight = parseInt(font, 10);
+      // draw top left rectangle
+      ctx.fillRect(x, y, textWidth + 10, textHeight + 10);
+      // draw bottom left rectangle
+      ctx.fillRect(x, height - textHeight + 10, textWidth + 15, textHeight + 10);
+
+      // Draw the text last to ensure it's on top.
+      ctx.fillStyle = "#000000";
+      ctx.fillText(prediction.class, x, y);
+      ctx.fillText(prediction.score.toFixed(2), x, height - 4);
+    });
   };
 
   componentDidMount() {
@@ -49,47 +93,6 @@ class App extends React.Component {
     }
   }
 
-  detectFromVideoFrame = (model, video) => {
-    model.detect(video).then(predictions => {
-      this.showDetections(predictions);
-      requestAnimationFrame(() => {
-        this.detectFromVideoFrame(model, video);
-      });
-    });
-  };
-
-  showDetections = predictions => {
-    const ctx = this.canvasRef.current.getContext("2d");
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    const font = "24px helvetica";
-    ctx.font = font;
-    ctx.textBaseline = "top";
-
-    predictions.forEach(prediction => {
-      const x = prediction.bbox[0];
-      const y = prediction.bbox[1];
-      const width = prediction.bbox[2];
-      const height = prediction.bbox[3];
-      // Draw the bounding box.
-      ctx.strokeStyle = "#2fff00";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x, y, width, height);
-      // Draw the label background.
-      ctx.fillStyle = "#2fff00";
-      const textWidth = ctx.measureText(prediction.class).width;
-      const textHeight = parseInt(font, 10);
-      // draw top left rectangle
-      ctx.fillRect(x, y, textWidth + 10, textHeight + 10);
-      // draw bottom left rectangle
-      ctx.fillRect(x, height - textHeight + 10, textWidth + 15, textHeight + 10);
-
-      // Draw the text last to ensure it's on top.
-      ctx.fillStyle = "#000000";
-      ctx.fillText(prediction.class, x, y);
-      ctx.fillText(prediction.score.toFixed(2), x, height - 4);
-    });
-  };
-
   // here we are returning the video frame and canvas to draw,
   // so we are in someway drawing our video "on the go"
   render() {
@@ -110,4 +113,4 @@ class App extends React.Component {
 }
 
 const domContainer = document.querySelector('#root');
-ReactDOM.render(e(App), domContainer);
+ReactDOM.render(React.createElement(App), domContainer);
