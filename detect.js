@@ -1,52 +1,113 @@
-function detect(img) {
-  // add some logging to know where we are :)
-  console.log('Executing...')
+const e = React.createElement;
 
-  const canvas = document.getElementById("imgCanvas");
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+class App extends React.Component {
+  // reference to both the video and canvas
+  videoRef = React.createRef();
+  canvasRef = React.createRef();
 
-  const font = "24px helvetica";
-  ctx.font = font;
-  ctx.textBaseline = "top";
-  
-  ctx.fillText("Predicting...", 50, 50)
+  // we are gonna use inline style
+  styles = {
+    position: 'fixed',
+    top: 150,
+    left: 150,
+  };
 
-  // Load the model.
-  cocoSsd.load().then(model => {
-    console.log('Predicting')
+  componentDidMount() {
+    if (navigator.mediaDevices.getUserMedia) {
+      // define a Promise that'll be used to load the webcam and read its frames
+      const webcamPromise = navigator.mediaDevices
+        .getUserMedia({
+          video: true,
+          audio: false,
+        })
+        .then(stream => {
+          // pass the current frame to the window.stream
+          window.stream = stream;
+          // pass the stream to the videoRef
+          this.videoRef.current.srcObject = stream;
 
-    ctx.drawImage(img,0, 0,400,400);
+          return new Promise(resolve => {
+            this.videoRef.current.onloadedmetadata = () => {
+              resolve();
+            };
+          });
+        }, (error) => {
+          console.log("Couldn't start the webcam")
+          console.error(error)
+        });
 
-    // detect objects in the image.
-    model.detect(img).then(predictions => {
-      predictions.forEach(prediction => {
-        const x = prediction.bbox[0];
-        const y = prediction.bbox[1];
-        const width = prediction.bbox[2];
-        const height = prediction.bbox[3];
-        // Draw the bounding box.
-        ctx.strokeStyle = "#2fff00";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(x, y, width, height);
-        // Draw the label background.
-        ctx.fillStyle = "#2fff00";
-        const textWidth = ctx.measureText(prediction.class).width;
-        const textHeight = parseInt(font, 10);
-        // draw top left rectangle
-        ctx.fillRect(x, y, textWidth + 10, textHeight + 10);
-        // draw bottom left rectangle
-        ctx.fillRect(x, height - textHeight + 10, textWidth + 15, textHeight + 10);
+      // define a Promise that'll be used to load the model
+      const loadlModelPromise = cocoSsd.load();
+      // resolve all the Promises
+      Promise.all([loadlModelPromise, webcamPromise])
+        .then(values => {
+          this.detectFromVideoFrame(values[0], this.videoRef.current);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+  }
 
-        // Draw the text last to ensure it's on top.
-        ctx.fillStyle = "#000000";
-        ctx.fillText(prediction.class, x, y);
-        ctx.fillText(prediction.score.toFixed(2), x, height - 4);
-    });      
-      console.log('Predictions: ', predictions);
+  detectFromVideoFrame = (model, video) => {
+    model.detect(video).then(predictions => {
+      this.showDetections(predictions);
+      requestAnimationFrame(() => {
+        this.detectFromVideoFrame(model, video);
+      });
     });
-  }, () => { // failure case callback
-    console.log("Couldn't load model.")
-  });
-  console.log('End of execution...')
+  };
+
+  showDetections = predictions => {
+    const ctx = this.canvasRef.current.getContext("2d");
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    const font = "24px helvetica";
+    ctx.font = font;
+    ctx.textBaseline = "top";
+
+    predictions.forEach(prediction => {
+      const x = prediction.bbox[0];
+      const y = prediction.bbox[1];
+      const width = prediction.bbox[2];
+      const height = prediction.bbox[3];
+      // Draw the bounding box.
+      ctx.strokeStyle = "#2fff00";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, y, width, height);
+      // Draw the label background.
+      ctx.fillStyle = "#2fff00";
+      const textWidth = ctx.measureText(prediction.class).width;
+      const textHeight = parseInt(font, 10);
+      // draw top left rectangle
+      ctx.fillRect(x, y, textWidth + 10, textHeight + 10);
+      // draw bottom left rectangle
+      ctx.fillRect(x, height - textHeight + 10, textWidth + 15, textHeight + 10);
+
+      // Draw the text last to ensure it's on top.
+      ctx.fillStyle = "#000000";
+      ctx.fillText(prediction.class, x, y);
+      ctx.fillText(prediction.score.toFixed(2), x, height - 4);
+    });
+  };
+
+  // here we are returning the video frame and canvas to draw,
+  // so we are in someway drawing our video "on the go"
+  render() {
+    return (
+      <div> 
+        <video
+          style={this.styles}
+          autoPlay
+          muted
+          ref={this.videoRef}
+          width="720"
+          height="600"
+        />
+        <canvas style={this.styles} ref={this.canvasRef} width="720" height="650" />
+      </div>
+    );
+  }
 }
+
+const domContainer = document.querySelector('#root');
+ReactDOM.render(e(App), domContainer);
