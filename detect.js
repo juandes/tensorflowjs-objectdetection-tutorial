@@ -47,12 +47,12 @@ class App extends React.Component {
       // draw top left rectangle
       ctx.fillRect(x, y, textWidth + 10, textHeight + 10);
       // draw bottom left rectangle
-      ctx.fillRect(x, height - textHeight + 10, textWidth + 15, textHeight + 10);
+      ctx.fillRect(x, y + height - textHeight, textWidth + 15, textHeight + 10);
 
       // Draw the text last to ensure it's on top.
       ctx.fillStyle = "#000000";
       ctx.fillText(prediction.class, x, y);
-      ctx.fillText(prediction.score.toFixed(2), x, height - 4);
+      ctx.fillText(prediction.score.toFixed(2), x, y + height - textHeight);
     });
   };
 
