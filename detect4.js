@@ -64,7 +64,6 @@ class App extends React.Component {
     const font = "24px helvetica";
     ctx.font = font;
     ctx.textBaseline = "top";
-    ctx.fillText("Predicting....", 50, 50)
 
     predictions.forEach(prediction => {
       const x = prediction.bbox[0];
