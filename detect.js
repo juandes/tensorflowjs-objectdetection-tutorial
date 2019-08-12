@@ -82,6 +82,7 @@ class App extends React.Component {
 
       // define a Promise that'll be used to load the model
       const loadlModelPromise = cocoSsd.load();
+      
       // resolve all the Promises
       Promise.all([loadlModelPromise, webcamPromise])
         .then(values => {
