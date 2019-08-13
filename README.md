@@ -16,3 +16,11 @@ Once the server is up and running, open your browser, and go to http://localhost
 ### Tutorial
 For a complete tutorial, and a theory lesson about the model and what's under the hood, please refer to the following link: ...
 
+
+
+
+This is the app in action.
+
+![](gif/1.gif)
+![](gif/2.gif)
+
