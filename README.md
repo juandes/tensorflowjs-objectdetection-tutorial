@@ -22,5 +22,7 @@ For a complete tutorial, and a theory lesson about the model and what's under th
 This is the app in action.
 
 ![](gif/1.gif)
+
+
 ![](gif/2.gif)
 
