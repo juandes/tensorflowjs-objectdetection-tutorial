@@ -57,7 +57,7 @@ class App extends React.Component {
   };
 
   componentDidMount() {
-    if (navigator.mediaDevices.getUserMedia || navigator.mediaDevices.webkitGetUserMedia || navigator.mediaDevices.mozGetUserMedia) {
+    if (navigator.mediaDevices.getUserMedia || navigator.mediaDevices.webkitGetUserMedia) {
       // define a Promise that'll be used to load the webcam and read its frames
       const webcamPromise = navigator.mediaDevices
         .getUserMedia({
