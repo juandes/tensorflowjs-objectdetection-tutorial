@@ -57,41 +57,17 @@ class App extends React.Component {
   };
 
   componentDidMount() {
-    if (navigator.mediaDevices.getUserMedia || navigator.mediaDevices.webkitGetUserMedia) {
-      // define a Promise that'll be used to load the webcam and read its frames
-      const webcamPromise = navigator.mediaDevices
-        .getUserMedia({
-          video: true,
-          audio: false,
-        })
-        .then(stream => {
-          // pass the current frame to the window.stream
-          window.stream = stream;
-          // pass the stream to the videoRef
-          this.videoRef.current.srcObject = stream;
-
-          return new Promise(resolve => {
-            this.videoRef.current.onloadedmetadata = () => {
-              resolve();
-            };
-          });
-        }, (error) => {
-          console.log("Couldn't start the webcam")
-          console.error(error)
-        });
-
-      // define a Promise that'll be used to load the model
-      const loadlModelPromise = cocoSsd.load();
-      
-      // resolve all the Promises
-      Promise.all([loadlModelPromise, webcamPromise])
-        .then(values => {
-          this.detectFromVideoFrame(values[0], this.videoRef.current);
-        })
-        .catch(error => {
-          console.error(error);
-        });
-    }
+    // define a Promise that'll be used to load the model
+    const loadlModelPromise = cocoSsd.load();
+    
+    // resolve all the Promises
+    Promise.all([loadlModelPromise])
+    .then(values => {
+        this.detectFromVideoFrame(values[0], this.videoRef.current);
+    })
+    .catch(error => {
+        console.error(error);
+    });
   }
 
   // here we are returning the video frame and canvas to draw,
@@ -103,6 +79,7 @@ class App extends React.Component {
           style={this.styles}
           autoPlay
           muted
+          src="data/ob_vid.mov" // VIDEO GOES HERE
           ref={this.videoRef}
           width="720"
           height="600"
