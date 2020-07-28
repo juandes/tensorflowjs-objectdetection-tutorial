@@ -103,6 +103,7 @@ class App extends React.Component {
           style={this.styles}
           autoPlay
           muted
+          playsInline
           ref={this.videoRef}
           width="720"
           height="600"
